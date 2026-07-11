@@ -63,9 +63,15 @@
         return;
     }
 
-    NSString *focusedRole = [self.focusInspector focusedElementRole];
+    // Try role-agnostic rules first; the focused-element round-trip only
+    // happens when a rule actually constrains the editor role.
     SZTargetRule *rule = [self.matcher ruleMatchingBundleIdentifier:bundleIdentifier
-                                                        focusedRole:focusedRole];
+                                                        focusedRole:nil];
+    if (rule == nil) {
+        NSString *focusedRole = [self.focusInspector focusedElementRole];
+        rule = [self.matcher ruleMatchingBundleIdentifier:bundleIdentifier
+                                              focusedRole:focusedRole];
+    }
     if (rule == nil) {
         [self.interpreter reset];
         return;

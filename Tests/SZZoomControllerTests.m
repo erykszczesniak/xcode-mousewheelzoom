@@ -146,10 +146,30 @@ static const pid_t SZFakeXcodePid = 4242;
     XCTAssertEqual(_focus.focusedRoleQueryCount, 0u);
 }
 
-- (void)testNonEditorFocusInXcodePassesThrough {
+- (void)testNonEditorFocusInXcodeStillZoomsWithoutFocusQuery {
+    _focus.focusedRole = @"AXButton";
+    [_monitor sendSample:[self wheelSampleWithDelta:3.0 timestamp:1.0] commandOnly:YES];
+
+    // The default Xcode rule is role-agnostic, so it acts on any focus and
+    // never needs the AX focus round-trip.
+    XCTAssertEqual(_poster.posted.count, 1u);
+    XCTAssertEqual(_focus.focusedRoleQueryCount, 0u);
+}
+
+- (void)testRoleConstrainedRuleQueriesFocusAndPassesThroughOnMismatch {
+    SZTargetRule *constrained =
+        [SZTargetRule ruleWithBundleIdentifier:SZXcodeBundleIdentifier
+                                   editorRoles:[NSSet setWithObject:@"AXTextArea"]];
+    _controller.matcher = [[SZTargetMatcher alloc] initWithRules:@[ constrained ]];
+
     _focus.focusedRole = @"AXButton";
     [_monitor sendSample:[self wheelSampleWithDelta:3.0 timestamp:1.0] commandOnly:YES];
     XCTAssertEqual(_poster.posted.count, 0u);
+    XCTAssertEqual(_focus.focusedRoleQueryCount, 1u);
+
+    _focus.focusedRole = @"AXTextArea";
+    [_monitor sendSample:[self wheelSampleWithDelta:3.0 timestamp:1.1] commandOnly:YES];
+    XCTAssertEqual(_poster.posted.count, 1u);
 }
 
 - (void)testDisabledControllerPassesThrough {
