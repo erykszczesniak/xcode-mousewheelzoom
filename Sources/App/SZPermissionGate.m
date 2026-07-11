@@ -2,6 +2,8 @@
 
 #import <AppKit/AppKit.h>
 
+#import "SZStrings.h"
+
 static const NSTimeInterval SZPermissionPollInterval = 1.0;
 
 @interface SZPermissionGate ()
@@ -43,13 +45,9 @@ static const NSTimeInterval SZPermissionPollInterval = 1.0;
 - (void)showExplainer {
     NSAlert *alert = [[NSAlert alloc] init];
     alert.alertStyle = NSAlertStyleInformational;
-    alert.messageText = @"ScrollZoom needs Accessibility access";
-    alert.informativeText = @"ScrollZoom watches for ⌘ + scroll and sends the matching "
-                            @"font-size shortcut to Xcode. macOS requires Accessibility "
-                            @"permission for both.\n\nGrant access in System Settings → "
-                            @"Privacy & Security → Accessibility. ScrollZoom stays inactive "
-                            @"until then.";
-    [alert addButtonWithTitle:@"Continue"];
+    alert.messageText = SZLocalizedPermissionExplainerTitle();
+    alert.informativeText = SZLocalizedPermissionExplainerBody();
+    [alert addButtonWithTitle:SZLocalizedPermissionExplainerContinue()];
     [alert runModal];
 }
 
