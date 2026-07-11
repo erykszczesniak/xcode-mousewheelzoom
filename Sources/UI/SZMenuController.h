@@ -9,6 +9,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// Creates the status item and attaches the menu.
 - (void)install;
 
+/// Reflects the Accessibility permission state in the menu.
+- (void)updatePermissionStatus:(BOOL)granted;
+
 @end
 
 NS_ASSUME_NONNULL_END

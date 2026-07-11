@@ -3,6 +3,7 @@
 @interface SZMenuController ()
 
 @property (nonatomic, strong) NSStatusItem *statusItem;
+@property (nonatomic, strong) NSMenuItem *permissionStatusItem;
 
 @end
 
@@ -19,6 +20,11 @@
     self.statusItem.menu = [self buildMenu];
 }
 
+- (void)updatePermissionStatus:(BOOL)granted {
+    self.permissionStatusItem.title = granted ? @"Accessibility: granted"
+                                              : @"Accessibility: not granted";
+}
+
 #pragma mark - Menu construction
 
 - (NSMenu *)buildMenu {
@@ -29,6 +35,12 @@
                                                  keyEquivalent:@""];
     headerItem.enabled = NO;
     [menu addItem:headerItem];
+
+    self.permissionStatusItem = [[NSMenuItem alloc] initWithTitle:@"Accessibility: unknown"
+                                                           action:NULL
+                                                    keyEquivalent:@""];
+    self.permissionStatusItem.enabled = NO;
+    [menu addItem:self.permissionStatusItem];
 
     [menu addItem:[NSMenuItem separatorItem]];
 
