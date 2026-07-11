@@ -30,6 +30,12 @@ NS_ASSUME_NONNULL_BEGIN
 /// Whether the scroll monitor is currently attached.
 @property (nonatomic, readonly, getter=isArmed) BOOL armed;
 
+/// Swappable at runtime so configuration changes take effect immediately.
+@property (nonatomic, strong) SZTargetMatcher *matcher;
+
+/// Exposed for runtime sensitivity tuning.
+@property (nonatomic, strong, readonly) SZGestureInterpreter *interpreter;
+
 /// Attaches the scroll monitor. Call only after Accessibility is granted.
 - (void)arm;
 

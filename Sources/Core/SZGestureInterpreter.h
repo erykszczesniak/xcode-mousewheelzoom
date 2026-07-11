@@ -16,8 +16,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// - a direction flip or an idle pause resets the accumulator
 @interface SZGestureInterpreter : NSObject
 
-/// Pixels of precise (trackpad) scroll needed per zoom step.
-@property (nonatomic, readonly) double preciseDeltaThreshold;
+/// Pixels of precise (trackpad) scroll needed per zoom step. Writable so
+/// sensitivity can be tuned at runtime.
+@property (nonatomic) double preciseDeltaThreshold;
 
 /// Minimum seconds between two emitted steps.
 @property (nonatomic, readonly) NSTimeInterval throttleInterval;

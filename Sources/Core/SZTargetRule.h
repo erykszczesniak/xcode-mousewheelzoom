@@ -4,9 +4,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 FOUNDATION_EXPORT NSString *const SZXcodeBundleIdentifier;
 
+@class SZActionMapper;
+
 /// Immutable description of one app ScrollZoom is allowed to act on: which
-/// bundle, and (optionally) which focused Accessibility roles count as "the
-/// editor" there.
+/// bundle, (optionally) which focused Accessibility roles count as "the
+/// editor" there, and (optionally) its own shortcut mapping.
 @interface SZTargetRule : NSObject
 
 @property (nonatomic, copy, readonly) NSString *bundleIdentifier;
@@ -15,8 +17,16 @@ FOUNDATION_EXPORT NSString *const SZXcodeBundleIdentifier;
 /// inside the app qualifies.
 @property (nonatomic, copy, readonly, nullable) NSSet<NSString *> *editorRoles;
 
+/// Shortcut mapping specific to this app; nil falls back to the default
+/// (⌘= / ⌘-).
+@property (nonatomic, strong, readonly, nullable) SZActionMapper *mapper;
+
 + (instancetype)ruleWithBundleIdentifier:(NSString *)bundleIdentifier
                              editorRoles:(nullable NSSet<NSString *> *)editorRoles;
+
++ (instancetype)ruleWithBundleIdentifier:(NSString *)bundleIdentifier
+                             editorRoles:(nullable NSSet<NSString *> *)editorRoles
+                                  mapper:(nullable SZActionMapper *)mapper;
 
 /// The built-in default: Xcode, acting only while a text area has focus.
 + (instancetype)xcodeRule;

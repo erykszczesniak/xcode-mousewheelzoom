@@ -4,8 +4,7 @@
 
 @property (nonatomic, strong) id<SZScrollEventMonitoring> monitor;
 @property (nonatomic, strong) id<SZFocusInspecting> focusInspector;
-@property (nonatomic, strong) SZGestureInterpreter *interpreter;
-@property (nonatomic, strong) SZTargetMatcher *matcher;
+@property (nonatomic, strong, readwrite) SZGestureInterpreter *interpreter;
 @property (nonatomic, strong) SZActionMapper *mapper;
 @property (nonatomic, strong) id<SZKeystrokePosting> synthesizer;
 
@@ -72,9 +71,10 @@
         return;
     }
 
+    SZActionMapper *mapper = rule.mapper ?: self.mapper;
     SZKeystrokeSpec keystroke;
-    if (![self.mapper getKeystroke:&keystroke
-                         forIntent:[self.interpreter intentForSample:sample]]) {
+    if (![mapper getKeystroke:&keystroke
+                    forIntent:[self.interpreter intentForSample:sample]]) {
         return;
     }
 
