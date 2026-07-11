@@ -34,5 +34,4 @@ Enable **Start at Login** from the menu.
 ## How it works & limits
 
 - Uses the Accessibility API (`CGEvent`) to send Xcode's zoom shortcuts.
-- Stepped zoom only (Xcode doesn't expose natively smooth editor zoom).
 - No code injection or SIP changes.
