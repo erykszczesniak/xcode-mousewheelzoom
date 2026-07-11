@@ -56,6 +56,8 @@
 
 @interface SZFakeKeystrokePoster : NSObject <SZKeystrokePosting>
 @property (nonatomic, strong) NSMutableArray<NSDictionary *> *posted;
+/// Mimics the real synthesizer, which cannot deliver to a dead process.
+@property (nonatomic) BOOL deliverySucceeds;
 @end
 
 @implementation SZFakeKeystrokePoster
@@ -64,17 +66,42 @@
     self = [super init];
     if (self) {
         _posted = [NSMutableArray array];
+        _deliverySucceeds = YES;
     }
     return self;
 }
 
-- (void)postKeystroke:(SZKeystrokeSpec)keystroke
+- (BOOL)postKeystroke:(SZKeystrokeSpec)keystroke
   toProcessIdentifier:(pid_t)processIdentifier {
+    if (!self.deliverySucceeds || processIdentifier <= 0) {
+        return NO;
+    }
     [self.posted addObject:@{
         @"keyCode" : @(keystroke.keyCode),
         @"flags" : @(keystroke.modifierFlags),
         @"pid" : @(processIdentifier),
     }];
+    return YES;
+}
+
+@end
+
+@interface SZFakeZoomFeedback : NSObject <SZZoomFeedbackPresenting>
+@property (nonatomic, strong) NSMutableArray<NSNumber *> *shownSteps;
+@end
+
+@implementation SZFakeZoomFeedback
+
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        _shownSteps = [NSMutableArray array];
+    }
+    return self;
+}
+
+- (void)showZoomSteps:(NSInteger)steps {
+    [self.shownSteps addObject:@(steps)];
 }
 
 @end
@@ -90,6 +117,7 @@ static const pid_t SZFakeXcodePid = 4242;
     SZFakeScrollMonitor *_monitor;
     SZFakeFocusInspector *_focus;
     SZFakeKeystrokePoster *_poster;
+    SZFakeZoomFeedback *_feedback;
     SZZoomController *_controller;
 }
 
@@ -101,12 +129,15 @@ static const pid_t SZFakeXcodePid = 4242;
     _focus.focusedRole = @"AXTextArea";
     _focus.processIdentifier = SZFakeXcodePid;
     _poster = [[SZFakeKeystrokePoster alloc] init];
+    _feedback = [[SZFakeZoomFeedback alloc] init];
     _controller = [[SZZoomController alloc] initWithMonitor:_monitor
                                              focusInspector:_focus
                                                 interpreter:[[SZGestureInterpreter alloc] init]
                                                     matcher:[[SZTargetMatcher alloc] init]
                                                      mapper:[[SZActionMapper alloc] init]
-                                                synthesizer:_poster];
+                                                synthesizer:_poster
+                                               levelTracker:[[SZZoomLevelTracker alloc] init]
+                                                   feedback:_feedback];
     [_controller arm];
 }
 
@@ -131,6 +162,53 @@ static const pid_t SZFakeXcodePid = 4242;
 
     XCTAssertEqual(_poster.posted.count, 1u);
     XCTAssertEqualObjects(_poster.posted.firstObject[@"keyCode"], @(SZKeyCodeMinus));
+}
+
+- (void)testFeedbackShowsRunningStepCount {
+    [_monitor sendSample:[self wheelSampleWithDelta:3.0 timestamp:1.0] commandOnly:YES];
+    [_monitor sendSample:[self wheelSampleWithDelta:3.0 timestamp:1.2] commandOnly:YES];
+    [_monitor sendSample:[self wheelSampleWithDelta:-3.0 timestamp:1.4] commandOnly:YES];
+
+    XCTAssertEqualObjects(_feedback.shownSteps, (@[ @1, @2, @1 ]));
+}
+
+- (void)testFeedbackNotShownForPassthroughEvents {
+    _focus.bundleIdentifier = @"com.apple.Safari";
+    [_monitor sendSample:[self wheelSampleWithDelta:3.0 timestamp:1.0] commandOnly:YES];
+    [_monitor sendSample:[self wheelSampleWithDelta:3.0 timestamp:1.2] commandOnly:NO];
+
+    XCTAssertEqual(_feedback.shownSteps.count, 0u);
+}
+
+- (void)testUndeliveredKeystrokeDoesNotCountAsAStep {
+    // The target app quit between the bundle check and the post.
+    _poster.deliverySucceeds = NO;
+    [_monitor sendSample:[self wheelSampleWithDelta:3.0 timestamp:1.0] commandOnly:YES];
+    XCTAssertEqual(_feedback.shownSteps.count, 0u);
+
+    _poster.deliverySucceeds = YES;
+    [_monitor sendSample:[self wheelSampleWithDelta:3.0 timestamp:1.2] commandOnly:YES];
+    // The failed step must not have advanced the count.
+    XCTAssertEqualObjects(_feedback.shownSteps, (@[ @1 ]));
+}
+
+- (void)testResettingLevelTrackerClearsTheReportedCount {
+    [_monitor sendSample:[self wheelSampleWithDelta:3.0 timestamp:1.0] commandOnly:YES];
+    [_monitor sendSample:[self wheelSampleWithDelta:3.0 timestamp:1.2] commandOnly:YES];
+
+    [_controller.levelTracker resetBundleIdentifier:SZXcodeBundleIdentifier];
+    [_monitor sendSample:[self wheelSampleWithDelta:3.0 timestamp:1.4] commandOnly:YES];
+
+    XCTAssertEqualObjects(_feedback.shownSteps, (@[ @1, @2, @1 ]));
+}
+
+- (void)testFeedbackNotShownWhenGestureIsThrottled {
+    [_monitor sendSample:[self wheelSampleWithDelta:3.0 timestamp:1.00] commandOnly:YES];
+    // Inside the throttle window: no keystroke, so no HUD update either.
+    [_monitor sendSample:[self wheelSampleWithDelta:3.0 timestamp:1.01] commandOnly:YES];
+
+    XCTAssertEqual(_poster.posted.count, 1u);
+    XCTAssertEqual(_feedback.shownSteps.count, 1u);
 }
 
 - (void)testPlainScrollPassesThrough {

@@ -7,6 +7,8 @@
 @property (nonatomic, strong, readwrite) SZGestureInterpreter *interpreter;
 @property (nonatomic, strong) SZActionMapper *mapper;
 @property (nonatomic, strong) id<SZKeystrokePosting> synthesizer;
+@property (nonatomic, strong, readwrite) SZZoomLevelTracker *levelTracker;
+@property (nonatomic, strong, nullable) id<SZZoomFeedbackPresenting> feedback;
 
 @end
 
@@ -17,7 +19,9 @@
                     interpreter:(SZGestureInterpreter *)interpreter
                         matcher:(SZTargetMatcher *)matcher
                          mapper:(SZActionMapper *)mapper
-                    synthesizer:(id<SZKeystrokePosting>)synthesizer {
+                    synthesizer:(id<SZKeystrokePosting>)synthesizer
+                   levelTracker:(SZZoomLevelTracker *)levelTracker
+                       feedback:(id<SZZoomFeedbackPresenting>)feedback {
     self = [super init];
     if (self) {
         _monitor = monitor;
@@ -26,6 +30,8 @@
         _matcher = matcher;
         _mapper = mapper;
         _synthesizer = synthesizer;
+        _levelTracker = levelTracker;
+        _feedback = feedback;
         _enabled = YES;
     }
     return self;
@@ -77,15 +83,22 @@
         return;
     }
 
+    SZZoomIntent intent = [self.interpreter intentForSample:sample];
     SZActionMapper *mapper = rule.mapper ?: self.mapper;
     SZKeystrokeSpec keystroke;
-    if (![mapper getKeystroke:&keystroke
-                    forIntent:[self.interpreter intentForSample:sample]]) {
+    if (![mapper getKeystroke:&keystroke forIntent:intent]) {
         return;
     }
 
-    [self.synthesizer postKeystroke:keystroke
-                toProcessIdentifier:[self.focusInspector frontmostApplicationProcessIdentifier]];
+    pid_t pid = [self.focusInspector frontmostApplicationProcessIdentifier];
+    if (![self.synthesizer postKeystroke:keystroke toProcessIdentifier:pid]) {
+        // The app vanished mid-gesture: never count a step that never landed.
+        return;
+    }
+
+    NSInteger steps = [self.levelTracker applyIntent:intent
+                                 forBundleIdentifier:bundleIdentifier];
+    [self.feedback showZoomSteps:steps];
 }
 
 @end

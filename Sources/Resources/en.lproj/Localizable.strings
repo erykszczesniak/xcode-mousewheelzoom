@@ -84,3 +84,6 @@
 
 /* Error when adding an app that is already a target */
 "%@ is already in the target list." = "%@ is already in the target list.";
+
+/* Accessibility label for the zoom HUD overlay */
+"Zoom level" = "Zoom level";

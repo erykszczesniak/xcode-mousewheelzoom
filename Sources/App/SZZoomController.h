@@ -6,12 +6,15 @@
 #import "SZGestureInterpreter.h"
 #import "SZKeystrokeSynthesizer.h"
 #import "SZTargetMatcher.h"
+#import "SZZoomHUD.h"
+#import "SZZoomLevelTracker.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 /// Ties the pipeline together: scroll monitor → gesture interpreter →
-/// target matcher → action mapper → keystroke synthesizer. Every dependency
-/// is a protocol or a pure object, so the whole flow is testable with fakes.
+/// target matcher → action mapper → keystroke synthesizer, with on-screen
+/// feedback. Every dependency is a protocol or a pure object, so the whole
+/// flow is testable with fakes.
 @interface SZZoomController : NSObject
 
 - (instancetype)initWithMonitor:(id<SZScrollEventMonitoring>)monitor
@@ -20,6 +23,8 @@ NS_ASSUME_NONNULL_BEGIN
                         matcher:(SZTargetMatcher *)matcher
                          mapper:(SZActionMapper *)mapper
                     synthesizer:(id<SZKeystrokePosting>)synthesizer
+                   levelTracker:(SZZoomLevelTracker *)levelTracker
+                       feedback:(nullable id<SZZoomFeedbackPresenting>)feedback
     NS_DESIGNATED_INITIALIZER;
 - (instancetype)init NS_UNAVAILABLE;
 
@@ -35,6 +40,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// Exposed for runtime sensitivity tuning.
 @property (nonatomic, strong, readonly) SZGestureInterpreter *interpreter;
+
+/// Exposed so the app can forget an app's accumulated steps when the count
+/// stops reflecting reality (target removed, app quit and relaunched).
+@property (nonatomic, strong, readonly) SZZoomLevelTracker *levelTracker;
 
 /// Attaches the scroll monitor. Call only after Accessibility is granted.
 - (void)arm;

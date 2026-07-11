@@ -49,6 +49,14 @@ static const NSTimeInterval SZTrustWatchInterval = 5.0;
                                                  name:SZPreferencesDidChangeNotification
                                                object:self.preferences];
 
+    // A target app that quits comes back at its own default font size, so the
+    // step count ScrollZoom accumulated for it is meaningless afterwards.
+    [[NSWorkspace sharedWorkspace].notificationCenter
+        addObserver:self
+           selector:@selector(applicationDidTerminate:)
+               name:NSWorkspaceDidTerminateApplicationNotification
+             object:nil];
+
     __weak typeof(self) weakSelf = self;
     self.menuController.openSettingsHandler = ^{
         [weakSelf.accessibility openAccessibilitySettings];
@@ -104,7 +112,9 @@ static const NSTimeInterval SZTrustWatchInterval = 5.0;
                                           interpreter:[[SZGestureInterpreter alloc] init]
                                               matcher:[[SZTargetMatcher alloc] init]
                                                mapper:[[SZActionMapper alloc] init]
-                                          synthesizer:[[SZKeystrokeSynthesizer alloc] init]];
+                                          synthesizer:[[SZKeystrokeSynthesizer alloc] init]
+                                         levelTracker:[[SZZoomLevelTracker alloc] init]
+                                             feedback:[[SZZoomHUD alloc] init]];
     }
     [self applyPreferences];
     [self.zoomController arm];
@@ -140,10 +150,29 @@ static const NSTimeInterval SZTrustWatchInterval = 5.0;
         return;
     }
     self.zoomController.enabled = self.preferences.isEnabled;
-    self.zoomController.matcher =
+
+    SZTargetMatcher *matcher =
         [[SZTargetMatcher alloc] initWithRules:self.preferences.activeTargetRules];
+    // An app that is no longer a target may be zoomed by hand from now on, so
+    // its accumulated step count would be fiction if it is ever re-added.
+    for (SZTargetRule *rule in self.zoomController.matcher.rules) {
+        if (![matcher hasRuleForBundleIdentifier:rule.bundleIdentifier]) {
+            [self.zoomController.levelTracker resetBundleIdentifier:rule.bundleIdentifier];
+        }
+    }
+    self.zoomController.matcher = matcher;
+
     self.zoomController.interpreter.preciseDeltaThreshold =
         self.preferences.preciseDeltaThreshold;
+}
+
+- (void)applicationDidTerminate:(NSNotification *)notification {
+    NSRunningApplication *application =
+        notification.userInfo[NSWorkspaceApplicationKey];
+    NSString *bundleIdentifier = application.bundleIdentifier;
+    if (bundleIdentifier != nil) {
+        [self.zoomController.levelTracker resetBundleIdentifier:bundleIdentifier];
+    }
 }
 
 #pragma mark - Login item

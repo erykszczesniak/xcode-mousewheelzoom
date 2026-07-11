@@ -9,7 +9,9 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol SZKeystrokePosting <NSObject>
 
 /// Posts a key-down/key-up pair for `keystroke` to one process only.
-- (void)postKeystroke:(SZKeystrokeSpec)keystroke
+/// Returns NO when nothing was delivered (e.g. the frontmost app vanished
+/// mid-gesture), so callers never count a zoom step that never happened.
+- (BOOL)postKeystroke:(SZKeystrokeSpec)keystroke
   toProcessIdentifier:(pid_t)processIdentifier;
 
 @end
