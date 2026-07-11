@@ -1,10 +1,10 @@
 #import "SZAppDelegate.h"
 
 #import <Carbon/Carbon.h>
-#import <ServiceManagement/ServiceManagement.h>
 
 #import "SZAccessibility.h"
 #import "SZHotKey.h"
+#import "SZLoginItem.h"
 #import "SZMenuController.h"
 #import "SZPermissionGate.h"
 #import "SZPreferences.h"
@@ -18,6 +18,7 @@
 @property (nonatomic, strong) SZPermissionGate *permissionGate;
 @property (nonatomic, strong) SZZoomController *zoomController;
 @property (nonatomic, strong) SZHotKey *toggleHotKey;
+@property (nonatomic, strong) id<SZLoginItemManaging> loginItem;
 @property (nonatomic, strong) NSTimer *trustWatchTimer;
 
 @end
@@ -29,6 +30,7 @@ static const NSTimeInterval SZTrustWatchInterval = 5.0;
 
 - (void)applicationDidFinishLaunching:(NSNotification *)notification {
     self.preferences = [[SZPreferences alloc] init];
+    self.loginItem = [[SZLoginItem alloc] init];
     self.accessibility = [[SZAccessibility alloc] init];
     self.permissionGate = [[SZPermissionGate alloc] initWithTrustChecker:self.accessibility];
 
@@ -125,28 +127,22 @@ static const NSTimeInterval SZTrustWatchInterval = 5.0;
 #pragma mark - Login item
 
 - (void)toggleLoginItem {
-    SMAppService *service = SMAppService.mainAppService;
     NSError *error = nil;
-    BOOL succeeded;
-    if (service.status == SMAppServiceStatusEnabled) {
-        succeeded = [service unregisterAndReturnError:&error];
-    } else {
-        succeeded = [service registerAndReturnError:&error];
+    if ([self.loginItem setEnabled:!self.loginItem.isEnabled error:&error]) {
+        return;
     }
 
-    if (!succeeded) {
-        NSAlert *alert = [[NSAlert alloc] init];
-        alert.alertStyle = NSAlertStyleWarning;
-        alert.messageText = @"Could not update the login item";
-        alert.informativeText = error.localizedDescription ?: @"Unknown error.";
-        [alert runModal];
-    }
+    NSAlert *alert = [[NSAlert alloc] init];
+    alert.alertStyle = NSAlertStyleWarning;
+    alert.messageText = @"Could not update the login item";
+    alert.informativeText = error.localizedDescription ?: @"Unknown error.";
+    [alert runModal];
 }
 
 #pragma mark - SZMenuStateProviding
 
 - (BOOL)isLoginItemEnabled {
-    return SMAppService.mainAppService.status == SMAppServiceStatusEnabled;
+    return self.loginItem.isEnabled;
 }
 
 - (BOOL)isPermissionGranted {
