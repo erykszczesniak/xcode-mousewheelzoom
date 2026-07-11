@@ -82,11 +82,10 @@ static const double SZSensitivityHighThreshold = 8.0;
     self.loginItem.target = self;
     [menu addItem:self.loginItem];
 
-    // No ⌘, key equivalent yet: status-item menus only match shortcuts while
-    // open, and the agent has no main menu to route them — lands separately.
+    // ⌘, is routed by SZMainMenu; shown here so the shortcut is discoverable.
     NSMenuItem *settingsWindowItem = [[NSMenuItem alloc] initWithTitle:SZLocalizedMenuSettings()
                                                                 action:@selector(openSettingsWindow:)
-                                                         keyEquivalent:@""];
+                                                         keyEquivalent:@","];
     settingsWindowItem.target = self;
     [menu addItem:settingsWindowItem];
 

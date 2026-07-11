@@ -5,6 +5,7 @@
 #import "SZAccessibility.h"
 #import "SZHotKey.h"
 #import "SZLoginItem.h"
+#import "SZMainMenu.h"
 #import "SZMenuController.h"
 #import "SZPermissionGate.h"
 #import "SZPreferences.h"
@@ -76,6 +77,9 @@ static const NSTimeInterval SZTrustWatchInterval = 5.0;
     };
     [self.menuController install];
 
+    // Agent apps have no main menu, so ⌘, / ⌘W / ⌘Q would go nowhere.
+    [SZMainMenu installWithSettingsAction:@selector(showSettingsWindow:) target:self];
+
     // ⌃⌥⌘Z pauses/resumes globally — the escape hatch if a gesture ever
     // misbehaves inside a full-screen app.
     self.toggleHotKey = [[SZHotKey alloc] initWithKeyCode:kVK_ANSI_Z
@@ -88,6 +92,10 @@ static const NSTimeInterval SZTrustWatchInterval = 5.0;
     [self.permissionGate runWithGrantedHandler:^{
         [weakSelf armEventPipeline];
     }];
+}
+
+- (void)showSettingsWindow:(id)sender {
+    [self.settingsPresenter show];
 }
 
 - (void)toggleEnabledFromHotKey {

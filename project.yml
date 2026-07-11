@@ -49,6 +49,8 @@ targets:
       - path: Sources/UI/SZStrings.h
       - path: Sources/UI/SZZoomHUD.h
       - path: Sources/UI/SZZoomHUD.m
+      - path: Sources/UI/SZMainMenu.h
+      - path: Sources/UI/SZMainMenu.m
     settings:
       base:
         CLANG_ENABLE_OBJC_ARC: YES
