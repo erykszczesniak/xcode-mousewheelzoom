@@ -14,6 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// now, nil otherwise (passthrough).
 - (nullable NSString *)activeTargetName;
 
+/// Whether the agent is registered to start at login.
+- (BOOL)isLoginItemEnabled;
+
 @end
 
 /// Owns the NSStatusItem and the agent's menu: status line, master toggle,
@@ -32,6 +35,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// Called from the "Open Accessibility Settings…" item.
 @property (nonatomic, copy, nullable) void (^openSettingsHandler)(void);
+
+/// Called from the "Start at Login" item.
+@property (nonatomic, copy, nullable) void (^toggleLoginItemHandler)(void);
 
 /// Creates the status item and attaches the menu.
 - (void)install;

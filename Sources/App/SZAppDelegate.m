@@ -1,6 +1,7 @@
 #import "SZAppDelegate.h"
 
 #import <Carbon/Carbon.h>
+#import <ServiceManagement/ServiceManagement.h>
 
 #import "SZAccessibility.h"
 #import "SZHotKey.h"
@@ -40,6 +41,9 @@ static const NSTimeInterval SZTrustWatchInterval = 5.0;
     };
     self.menuController.openSettingsHandler = ^{
         [weakSelf.accessibility openAccessibilitySettings];
+    };
+    self.menuController.toggleLoginItemHandler = ^{
+        [weakSelf toggleLoginItem];
     };
     [self.menuController install];
 
@@ -118,7 +122,32 @@ static const NSTimeInterval SZTrustWatchInterval = 5.0;
         self.preferences.preciseDeltaThreshold;
 }
 
+#pragma mark - Login item
+
+- (void)toggleLoginItem {
+    SMAppService *service = SMAppService.mainAppService;
+    NSError *error = nil;
+    BOOL succeeded;
+    if (service.status == SMAppServiceStatusEnabled) {
+        succeeded = [service unregisterAndReturnError:&error];
+    } else {
+        succeeded = [service registerAndReturnError:&error];
+    }
+
+    if (!succeeded) {
+        NSAlert *alert = [[NSAlert alloc] init];
+        alert.alertStyle = NSAlertStyleWarning;
+        alert.messageText = @"Could not update the login item";
+        alert.informativeText = error.localizedDescription ?: @"Unknown error.";
+        [alert runModal];
+    }
+}
+
 #pragma mark - SZMenuStateProviding
+
+- (BOOL)isLoginItemEnabled {
+    return SMAppService.mainAppService.status == SMAppServiceStatusEnabled;
+}
 
 - (BOOL)isPermissionGranted {
     return self.permissionGate.isTrusted;

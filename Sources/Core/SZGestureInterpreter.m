@@ -1,4 +1,4 @@
-#import "SZGestureInterpreter.h"
+ #import "SZGestureInterpreter.h"
 
 static const double SZDefaultPreciseDeltaThreshold = 15.0;
 static const NSTimeInterval SZDefaultThrottleInterval = 0.05;
