@@ -17,6 +17,39 @@ static NSString *const SZAccessibilitySettingsURLString =
     return AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)options);
 }
 
+#pragma mark - SZFocusInspecting
+
+- (NSString *)frontmostApplicationBundleIdentifier {
+    return [NSWorkspace sharedWorkspace].frontmostApplication.bundleIdentifier;
+}
+
+- (pid_t)frontmostApplicationProcessIdentifier {
+    NSRunningApplication *frontmost = [NSWorkspace sharedWorkspace].frontmostApplication;
+    return frontmost ? frontmost.processIdentifier : -1;
+}
+
+- (NSString *)focusedElementRole {
+    AXUIElementRef systemWide = AXUIElementCreateSystemWide();
+    CFTypeRef focused = NULL;
+    AXError error = AXUIElementCopyAttributeValue(systemWide,
+                                                  kAXFocusedUIElementAttribute,
+                                                  &focused);
+    CFRelease(systemWide);
+    if (error != kAXErrorSuccess || focused == NULL) {
+        return nil;
+    }
+
+    CFTypeRef role = NULL;
+    error = AXUIElementCopyAttributeValue((AXUIElementRef)focused, kAXRoleAttribute, &role);
+    CFRelease(focused);
+    if (error != kAXErrorSuccess || role == NULL) {
+        return nil;
+    }
+    return CFBridgingRelease(role);
+}
+
+#pragma mark - Settings deep link
+
 - (void)openAccessibilitySettings {
     NSURL *settingsURL = [NSURL URLWithString:SZAccessibilitySettingsURLString];
     [[NSWorkspace sharedWorkspace] openURL:settingsURL];
