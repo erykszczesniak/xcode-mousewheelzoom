@@ -14,6 +14,7 @@ static const double SZSensitivityHighThreshold = 8.0;
 @property (nonatomic, strong) NSMenuItem *enabledItem;
 @property (nonatomic, strong) NSMenuItem *targetsItem;
 @property (nonatomic, strong) NSMenuItem *sensitivityItem;
+@property (nonatomic, strong) NSMenuItem *loginItem;
 @property (nonatomic, strong) NSMenuItem *settingsItem;
 
 @end
@@ -73,6 +74,12 @@ static const double SZSensitivityHighThreshold = 8.0;
     self.sensitivityItem.submenu = [self buildSensitivityMenu];
     [menu addItem:self.sensitivityItem];
 
+    self.loginItem = [[NSMenuItem alloc] initWithTitle:@"Start at Login"
+                                                action:@selector(toggleLoginItem:)
+                                         keyEquivalent:@""];
+    self.loginItem.target = self;
+    [menu addItem:self.loginItem];
+
     [menu addItem:[NSMenuItem separatorItem]];
 
     self.settingsItem = [[NSMenuItem alloc] initWithTitle:@"Open Accessibility Settings…"
@@ -128,6 +135,8 @@ static const double SZSensitivityHighThreshold = 8.0;
                                                         : NSControlStateValueOff;
     self.enabledItem.enabled = permitted;
     self.settingsItem.hidden = permitted;
+    self.loginItem.state = [self.stateProvider isLoginItemEnabled] ? NSControlStateValueOn
+                                                                   : NSControlStateValueOff;
 
     [self rebuildTargetsMenu];
 
@@ -196,6 +205,12 @@ static const double SZSensitivityHighThreshold = 8.0;
 - (void)selectSensitivity:(NSMenuItem *)sender {
     self.preferences.preciseDeltaThreshold = [sender.representedObject doubleValue];
     [self notifyConfigurationChanged];
+}
+
+- (void)toggleLoginItem:(NSMenuItem *)sender {
+    if (self.toggleLoginItemHandler) {
+        self.toggleLoginItemHandler();
+    }
 }
 
 - (void)showAbout:(NSMenuItem *)sender {

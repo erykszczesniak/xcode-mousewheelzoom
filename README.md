@@ -2,7 +2,7 @@
 
 ⌘ + scroll wheel zoom for Xcode (macOS).
 
-![ScrollZoom menu](docs/menu.png)
+![⌘ + scroll zooming Xcode](docs/demo.gif)
 
 ## Requirements
 
@@ -17,6 +17,19 @@ open ScrollZoom.xcodeproj   # build & run (⌘R)
 ```
 
 Grant Accessibility when prompted, then hold ⌘ and scroll in Xcode. ⌃⌥⌘Z pauses/resumes.
+
+## Install for good
+
+```
+xcodegen generate
+xcodebuild -scheme ScrollZoom -configuration Release -derivedDataPath build build
+cp -R build/Build/Products/Release/ScrollZoom.app /Applications/
+open /Applications/ScrollZoom.app
+```
+
+Then tick **Start at Login** in the menu — done, it survives reboots:
+
+![Start at Login](docs/menu.png)
 
 ## How it works & limits
 
