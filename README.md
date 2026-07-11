@@ -7,7 +7,7 @@
 ## Requirements
 
 - macOS 14 or later
-- Accessibility permission (prompted on first run)
+- Accessibility permission (prompted on first run; if the toggle is on but nothing happens after a rebuild, remove ScrollZoom from the Accessibility list and re-add it)
 
 ## Run
 

@@ -22,7 +22,12 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.erykszczesniak.ScrollZoom
         CLANG_ENABLE_OBJC_ARC: YES
-        CODE_SIGN_IDENTITY: "-"
+        # Sign with a real development certificate: ad-hoc signatures change
+        # on every rebuild, which silently invalidates the TCC Accessibility
+        # grant (the toggle stays on but AXIsProcessTrusted returns NO).
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "Apple Development"
+        DEVELOPMENT_TEAM: DRY9V64JW9
 
   ScrollZoomTests:
     type: bundle.unit-test
