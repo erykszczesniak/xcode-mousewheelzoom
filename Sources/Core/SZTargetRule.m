@@ -1,22 +1,36 @@
 #import "SZTargetRule.h"
 
+#import "SZActionMapper.h"
+
 NSString *const SZXcodeBundleIdentifier = @"com.apple.dt.Xcode";
 
 @implementation SZTargetRule
 
 - (instancetype)initWithBundleIdentifier:(NSString *)bundleIdentifier
-                             editorRoles:(NSSet<NSString *> *)editorRoles {
+                             editorRoles:(NSSet<NSString *> *)editorRoles
+                                  mapper:(SZActionMapper *)mapper {
     self = [super init];
     if (self) {
         _bundleIdentifier = [bundleIdentifier copy];
         _editorRoles = [editorRoles copy];
+        _mapper = mapper;
     }
     return self;
 }
 
 + (instancetype)ruleWithBundleIdentifier:(NSString *)bundleIdentifier
                              editorRoles:(NSSet<NSString *> *)editorRoles {
-    return [[self alloc] initWithBundleIdentifier:bundleIdentifier editorRoles:editorRoles];
+    return [[self alloc] initWithBundleIdentifier:bundleIdentifier
+                                      editorRoles:editorRoles
+                                           mapper:nil];
+}
+
++ (instancetype)ruleWithBundleIdentifier:(NSString *)bundleIdentifier
+                             editorRoles:(NSSet<NSString *> *)editorRoles
+                                  mapper:(SZActionMapper *)mapper {
+    return [[self alloc] initWithBundleIdentifier:bundleIdentifier
+                                      editorRoles:editorRoles
+                                           mapper:mapper];
 }
 
 + (instancetype)xcodeRule {
