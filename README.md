@@ -31,17 +31,16 @@ Enable **Start at Login** from the menu.
 
 ![Start at Login](docs/menu.png)
 
-## How it works & limits
 
-- Uses the Accessibility API (`CGEvent`) to send Xcode's zoom shortcuts.
-- No code injection or SIP changes.
+## How it works 
 
-## Architecture
+ScrollZoom is a menu-bar app that adds VS Code–style ⌘ + mouse wheel zoom to Xcode.
 
-ScrollZoom is a menu-bar agent that adds ⌘ + mouse-wheel zoom to Xcode — the VS Code gesture. Built the safe way: the Accessibility API, a global `NSEvent` monitor, and synthesized `⌘=` / `⌘-` posted with `CGEventPostToPid` — never system-wide, so a zoom step can only reach the app that was frontmost during the gesture. No SIP changes, no code injection, no third-party dependencies — pure Cocoa.
+It listens for ⌘ + scroll via the Accessibility API, translates the gesture into `⌘=` / `⌘-`, and sends the shortcuts directly to the frontmost Xcode process with `CGEventPostToPid`. No SIP changes, no code injection, no third-party dependencies — pure Cocoa.
+
 
 ```
-⌘ + scroll
+⌘ + mouse wheel
    │
    ▼
 SZEventTap ──► SZGestureInterpreter ──► SZTargetMatcher ──► SZActionMapper ──► SZKeystrokeSynthesizer ──► Xcode (⌘= / ⌘-)
