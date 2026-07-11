@@ -1,4 +1,4 @@
-# ScrollZoom
+# Xcode - Mouse Wheel Zoom
 
 ⌘ + mouse-wheel zoom for Xcode (macOS).
 
