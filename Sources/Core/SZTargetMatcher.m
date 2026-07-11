@@ -14,6 +14,18 @@
     return [self initWithRules:@[ [SZTargetRule xcodeRule] ]];
 }
 
+- (BOOL)hasRuleForBundleIdentifier:(NSString *)bundleIdentifier {
+    if (bundleIdentifier.length == 0) {
+        return NO;
+    }
+    for (SZTargetRule *rule in self.rules) {
+        if ([rule.bundleIdentifier isEqualToString:bundleIdentifier]) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
 - (SZTargetRule *)ruleMatchingBundleIdentifier:(NSString *)bundleIdentifier
                                    focusedRole:(NSString *)focusedRole {
     if (bundleIdentifier.length == 0) {

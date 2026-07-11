@@ -32,6 +32,11 @@ targets:
       - path: Sources/Core
       - path: Sources/Edge/NSEvent+SZModifiers.h
       - path: Sources/Edge/NSEvent+SZModifiers.m
+      - path: Sources/Edge/SZEventTap.h
+      - path: Sources/Edge/SZAccessibility.h
+      - path: Sources/Edge/SZKeystrokeSynthesizer.h
+      - path: Sources/App/SZZoomController.h
+      - path: Sources/App/SZZoomController.m
     settings:
       base:
         CLANG_ENABLE_OBJC_ARC: YES
