@@ -29,6 +29,9 @@ targets:
     platform: macOS
     sources:
       - Tests
+      - path: Sources/Core
+      - path: Sources/Edge/NSEvent+SZModifiers.h
+      - path: Sources/Edge/NSEvent+SZModifiers.m
     settings:
       base:
         CLANG_ENABLE_OBJC_ARC: YES
