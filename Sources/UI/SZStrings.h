@@ -101,6 +101,12 @@ static inline NSString *SZLocalizedPermissionExplainerContinue(void) {
     return NSLocalizedString(@"Continue", @"First-run permission alert button");
 }
 
+#pragma mark - Zoom HUD
+
+static inline NSString *SZLocalizedHUDAccessibilityLabel(void) {
+    return NSLocalizedString(@"Zoom level", @"Accessibility label for the zoom HUD overlay");
+}
+
 #pragma mark - Settings window
 
 static inline NSString *SZLocalizedSettingsNoBundleIdentifierFormat(void) {

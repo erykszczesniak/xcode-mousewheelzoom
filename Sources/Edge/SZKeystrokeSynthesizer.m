@@ -2,10 +2,10 @@
 
 @implementation SZKeystrokeSynthesizer
 
-- (void)postKeystroke:(SZKeystrokeSpec)keystroke
+- (BOOL)postKeystroke:(SZKeystrokeSpec)keystroke
   toProcessIdentifier:(pid_t)processIdentifier {
     if (processIdentifier <= 0) {
-        return;
+        return NO;
     }
 
     CGEventRef keyDown = CGEventCreateKeyboardEvent(NULL, keystroke.keyCode, true);
@@ -13,7 +13,7 @@
     if (keyDown == NULL || keyUp == NULL) {
         if (keyDown) CFRelease(keyDown);
         if (keyUp) CFRelease(keyUp);
-        return;
+        return NO;
     }
 
     CGEventSetFlags(keyDown, keystroke.modifierFlags);
@@ -24,6 +24,7 @@
 
     CFRelease(keyDown);
     CFRelease(keyUp);
+    return YES;
 }
 
 @end
