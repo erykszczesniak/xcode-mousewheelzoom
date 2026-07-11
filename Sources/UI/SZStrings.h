@@ -43,6 +43,10 @@ static inline NSString *SZLocalizedMenuStartAtLogin(void) {
     return NSLocalizedString(@"Start at Login", @"Toggle registering the agent as a login item");
 }
 
+static inline NSString *SZLocalizedMenuSettings(void) {
+    return NSLocalizedString(@"Settings…", @"Opens the Settings window");
+}
+
 static inline NSString *SZLocalizedMenuOpenAccessibilitySettings(void) {
     return NSLocalizedString(@"Open Accessibility Settings…",
                              @"Deep link to the Accessibility privacy pane");
@@ -95,6 +99,18 @@ static inline NSString *SZLocalizedPermissionExplainerBody(void) {
 
 static inline NSString *SZLocalizedPermissionExplainerContinue(void) {
     return NSLocalizedString(@"Continue", @"First-run permission alert button");
+}
+
+#pragma mark - Settings window
+
+static inline NSString *SZLocalizedSettingsNoBundleIdentifierFormat(void) {
+    return NSLocalizedString(@"“%@” has no bundle identifier, so it cannot be targeted.",
+                             @"Error when a chosen app bundle lacks an identifier");
+}
+
+static inline NSString *SZLocalizedSettingsDuplicateTargetFormat(void) {
+    return NSLocalizedString(@"%@ is already in the target list.",
+                             @"Error when adding an app that is already a target");
 }
 
 #pragma mark - Login item errors

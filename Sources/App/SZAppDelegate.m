@@ -11,6 +11,9 @@
 #import "SZStrings.h"
 #import "SZZoomController.h"
 
+// Generated interface for the app's Swift side (Settings window).
+#import "ScrollZoom-Swift.h"
+
 @interface SZAppDelegate () <SZMenuStateProviding>
 
 @property (nonatomic, strong) SZPreferences *preferences;
@@ -20,6 +23,7 @@
 @property (nonatomic, strong) SZZoomController *zoomController;
 @property (nonatomic, strong) SZHotKey *toggleHotKey;
 @property (nonatomic, strong) id<SZLoginItemManaging> loginItem;
+@property (nonatomic, strong) SZSettingsWindowPresenter *settingsPresenter;
 @property (nonatomic, strong) NSTimer *trustWatchTimer;
 
 @end
@@ -51,6 +55,16 @@ static const NSTimeInterval SZTrustWatchInterval = 5.0;
     };
     self.menuController.toggleLoginItemHandler = ^{
         [weakSelf toggleLoginItem];
+    };
+    self.settingsPresenter = [[SZSettingsWindowPresenter alloc]
+              initWithPreferences:self.preferences
+                        loginItem:self.loginItem
+                     trustChecker:self.accessibility
+        openAccessibilitySettings:^{
+            [weakSelf.accessibility openAccessibilitySettings];
+        }];
+    self.menuController.openSettingsWindowHandler = ^{
+        [weakSelf.settingsPresenter show];
     };
     [self.menuController install];
 

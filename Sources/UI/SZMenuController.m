@@ -82,6 +82,14 @@ static const double SZSensitivityHighThreshold = 8.0;
     self.loginItem.target = self;
     [menu addItem:self.loginItem];
 
+    // No ⌘, key equivalent yet: status-item menus only match shortcuts while
+    // open, and the agent has no main menu to route them — lands separately.
+    NSMenuItem *settingsWindowItem = [[NSMenuItem alloc] initWithTitle:SZLocalizedMenuSettings()
+                                                                action:@selector(openSettingsWindow:)
+                                                         keyEquivalent:@""];
+    settingsWindowItem.target = self;
+    [menu addItem:settingsWindowItem];
+
     [menu addItem:[NSMenuItem separatorItem]];
 
     self.settingsItem = [[NSMenuItem alloc] initWithTitle:SZLocalizedMenuOpenAccessibilitySettings()
@@ -204,6 +212,12 @@ static const double SZSensitivityHighThreshold = 8.0;
 
 - (void)selectSensitivity:(NSMenuItem *)sender {
     self.preferences.preciseDeltaThreshold = [sender.representedObject doubleValue];
+}
+
+- (void)openSettingsWindow:(NSMenuItem *)sender {
+    if (self.openSettingsWindowHandler) {
+        self.openSettingsWindowHandler();
+    }
 }
 
 - (void)toggleLoginItem:(NSMenuItem *)sender {

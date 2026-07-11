@@ -2,6 +2,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/// Posted after the login-item registration actually changes, so every UI
+/// surface (menu, Settings window) can re-read the state regardless of
+/// which one triggered the change. Object is the posting manager.
+FOUNDATION_EXPORT NSNotificationName const SZLoginItemDidChangeNotification;
+
 /// Seam over login-item registration so the app layer never talks to
 /// ServiceManagement directly and can be tested with a fake.
 @protocol SZLoginItemManaging <NSObject>

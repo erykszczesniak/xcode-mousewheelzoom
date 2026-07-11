@@ -57,3 +57,30 @@
 
 /* Alert body when the failure has no description */
 "Unknown error." = "Unknown error.";
+
+/* Opens the Settings window */
+"Settings…" = "Settings…";
+
+/* Settings window title */
+"ScrollZoom Settings" = "ScrollZoom Settings";
+
+/* Add target button */
+"Add Application…" = "Add Application…";
+
+/* Remove target tooltip */
+"Remove this app" = "Remove this app";
+
+/* Sensitivity explanation */
+"How far a trackpad swipe travels per zoom step." = "How far a trackpad swipe travels per zoom step.";
+
+/* Settings error title */
+"Something went wrong" = "Something went wrong";
+
+/* Dismiss error */
+"OK" = "OK";
+
+/* Error when a chosen app bundle lacks an identifier */
+"“%@” has no bundle identifier, so it cannot be targeted." = "“%@” has no bundle identifier, so it cannot be targeted.";
+
+/* Error when adding an app that is already a target */
+"%@ is already in the target list." = "%@ is already in the target list.";

@@ -22,6 +22,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.erykszczesniak.ScrollZoom
         CLANG_ENABLE_OBJC_ARC: YES
+        SWIFT_VERSION: "5.0"
+        SWIFT_OBJC_BRIDGING_HEADER: Sources/ScrollZoom-Bridging-Header.h
         # Sign with a real development certificate: ad-hoc signatures change
         # on every rebuild, which silently invalidates the TCC Accessibility
         # grant (the toggle stays on but AXIsProcessTrusted returns NO).
