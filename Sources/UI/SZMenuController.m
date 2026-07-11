@@ -1,5 +1,7 @@
 #import "SZMenuController.h"
 
+#import "SZStrings.h"
+
 /// Trackpad pixels per zoom step for the three sensitivity presets. Lower
 /// threshold = more steps for the same swipe = higher sensitivity.
 static const double SZSensitivityLowThreshold = 25.0;
@@ -33,7 +35,7 @@ static const double SZSensitivityHighThreshold = 8.0;
     self.statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSSquareStatusItemLength];
 
     NSImage *icon = [NSImage imageWithSystemSymbolName:@"plus.magnifyingglass"
-                              accessibilityDescription:@"ScrollZoom"];
+                              accessibilityDescription:SZLocalizedAppName()];
     [icon setTemplate:YES];
     self.statusItem.button.image = icon;
 
@@ -43,11 +45,11 @@ static const double SZSensitivityHighThreshold = 8.0;
 #pragma mark - Menu construction
 
 - (NSMenu *)buildMenu {
-    NSMenu *menu = [[NSMenu alloc] initWithTitle:@"ScrollZoom"];
+    NSMenu *menu = [[NSMenu alloc] initWithTitle:SZLocalizedAppName()];
     menu.delegate = self;
     menu.autoenablesItems = NO;
 
-    self.statusLineItem = [[NSMenuItem alloc] initWithTitle:@"ScrollZoom"
+    self.statusLineItem = [[NSMenuItem alloc] initWithTitle:SZLocalizedAppName()
                                                      action:NULL
                                               keyEquivalent:@""];
     self.statusLineItem.enabled = NO;
@@ -55,26 +57,26 @@ static const double SZSensitivityHighThreshold = 8.0;
 
     [menu addItem:[NSMenuItem separatorItem]];
 
-    self.enabledItem = [[NSMenuItem alloc] initWithTitle:@"Enabled"
+    self.enabledItem = [[NSMenuItem alloc] initWithTitle:SZLocalizedMenuEnabled()
                                                   action:@selector(toggleEnabled:)
                                            keyEquivalent:@""];
     self.enabledItem.target = self;
     [menu addItem:self.enabledItem];
 
-    self.targetsItem = [[NSMenuItem alloc] initWithTitle:@"Targets"
+    self.targetsItem = [[NSMenuItem alloc] initWithTitle:SZLocalizedMenuTargets()
                                                   action:NULL
                                            keyEquivalent:@""];
-    self.targetsItem.submenu = [[NSMenu alloc] initWithTitle:@"Targets"];
+    self.targetsItem.submenu = [[NSMenu alloc] initWithTitle:SZLocalizedMenuTargets()];
     self.targetsItem.submenu.autoenablesItems = NO;
     [menu addItem:self.targetsItem];
 
-    self.sensitivityItem = [[NSMenuItem alloc] initWithTitle:@"Sensitivity"
+    self.sensitivityItem = [[NSMenuItem alloc] initWithTitle:SZLocalizedMenuSensitivity()
                                                       action:NULL
                                                keyEquivalent:@""];
     self.sensitivityItem.submenu = [self buildSensitivityMenu];
     [menu addItem:self.sensitivityItem];
 
-    self.loginItem = [[NSMenuItem alloc] initWithTitle:@"Start at Login"
+    self.loginItem = [[NSMenuItem alloc] initWithTitle:SZLocalizedMenuStartAtLogin()
                                                 action:@selector(toggleLoginItem:)
                                          keyEquivalent:@""];
     self.loginItem.target = self;
@@ -82,19 +84,19 @@ static const double SZSensitivityHighThreshold = 8.0;
 
     [menu addItem:[NSMenuItem separatorItem]];
 
-    self.settingsItem = [[NSMenuItem alloc] initWithTitle:@"Open Accessibility Settings…"
+    self.settingsItem = [[NSMenuItem alloc] initWithTitle:SZLocalizedMenuOpenAccessibilitySettings()
                                                    action:@selector(openSettings:)
                                             keyEquivalent:@""];
     self.settingsItem.target = self;
     [menu addItem:self.settingsItem];
 
-    NSMenuItem *aboutItem = [[NSMenuItem alloc] initWithTitle:@"About ScrollZoom"
+    NSMenuItem *aboutItem = [[NSMenuItem alloc] initWithTitle:SZLocalizedMenuAbout()
                                                        action:@selector(showAbout:)
                                                 keyEquivalent:@""];
     aboutItem.target = self;
     [menu addItem:aboutItem];
 
-    NSMenuItem *quitItem = [[NSMenuItem alloc] initWithTitle:@"Quit ScrollZoom"
+    NSMenuItem *quitItem = [[NSMenuItem alloc] initWithTitle:SZLocalizedMenuQuit()
                                                       action:@selector(terminate:)
                                                keyEquivalent:@"q"];
     quitItem.target = NSApp;
@@ -104,9 +106,9 @@ static const double SZSensitivityHighThreshold = 8.0;
 }
 
 - (NSMenu *)buildSensitivityMenu {
-    NSMenu *menu = [[NSMenu alloc] initWithTitle:@"Sensitivity"];
+    NSMenu *menu = [[NSMenu alloc] initWithTitle:SZLocalizedMenuSensitivity()];
     menu.autoenablesItems = NO;
-    NSArray<NSString *> *titles = @[ @"Low", @"Normal", @"High" ];
+    NSArray<NSString *> *titles = @[ SZLocalizedMenuSensitivityLow(), SZLocalizedMenuSensitivityNormal(), SZLocalizedMenuSensitivityHigh() ];
     NSArray<NSNumber *> *thresholds = @[
         @(SZSensitivityLowThreshold), @(SZSensitivityNormalThreshold),
         @(SZSensitivityHighThreshold)
@@ -150,16 +152,16 @@ static const double SZSensitivityHighThreshold = 8.0;
 
 - (NSString *)statusLineTextWithPermission:(BOOL)permitted {
     if (!permitted) {
-        return @"Accessibility permission needed";
+        return SZLocalizedStatusPermissionNeeded();
     }
     if (!self.preferences.isEnabled) {
-        return @"Paused";
+        return SZLocalizedStatusPaused();
     }
     NSString *activeTargetName = [self.stateProvider activeTargetName];
     if (activeTargetName != nil) {
-        return [NSString stringWithFormat:@"Active — %@", activeTargetName];
+        return [NSString stringWithFormat:SZLocalizedStatusActiveFormat(), activeTargetName];
     }
-    return @"Armed — ⌘ + scroll in a target app";
+    return SZLocalizedStatusArmed();
 }
 
 - (void)rebuildTargetsMenu {

@@ -8,6 +8,7 @@
 #import "SZMenuController.h"
 #import "SZPermissionGate.h"
 #import "SZPreferences.h"
+#import "SZStrings.h"
 #import "SZZoomController.h"
 
 @interface SZAppDelegate () <SZMenuStateProviding>
@@ -134,8 +135,8 @@ static const NSTimeInterval SZTrustWatchInterval = 5.0;
 
     NSAlert *alert = [[NSAlert alloc] init];
     alert.alertStyle = NSAlertStyleWarning;
-    alert.messageText = @"Could not update the login item";
-    alert.informativeText = error.localizedDescription ?: @"Unknown error.";
+    alert.messageText = SZLocalizedLoginItemErrorTitle();
+    alert.informativeText = error.localizedDescription ?: SZLocalizedLoginItemErrorFallback();
     [alert runModal];
 }
 

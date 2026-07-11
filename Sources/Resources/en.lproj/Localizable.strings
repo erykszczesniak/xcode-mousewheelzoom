@@ -1,0 +1,59 @@
+/* App name shown in the menu and status item */
+"ScrollZoom" = "ScrollZoom";
+
+/* Master on/off toggle in the status menu */
+"Enabled" = "Enabled";
+
+/* Submenu listing the apps ScrollZoom acts on */
+"Targets" = "Targets";
+
+/* Submenu with trackpad sensitivity presets */
+"Sensitivity" = "Sensitivity";
+
+/* Least sensitive trackpad preset */
+"Low" = "Low";
+
+/* Default trackpad sensitivity preset */
+"Normal" = "Normal";
+
+/* Most sensitive trackpad preset */
+"High" = "High";
+
+/* Toggle registering the agent as a login item */
+"Start at Login" = "Start at Login";
+
+/* Deep link to the Accessibility privacy pane */
+"Open Accessibility Settings…" = "Open Accessibility Settings…";
+
+/* Standard about panel item */
+"About ScrollZoom" = "About ScrollZoom";
+
+/* Quit item in the status menu */
+"Quit ScrollZoom" = "Quit ScrollZoom";
+
+/* Status line while Accessibility is not granted */
+"Accessibility permission needed" = "Accessibility permission needed";
+
+/* Status line while the master toggle is off */
+"Paused" = "Paused";
+
+/* Status line while a target app is frontmost; %@ is the app name */
+"Active — %@" = "Active — %@";
+
+/* Status line while armed but no target is frontmost */
+"Armed — ⌘ + scroll in a target app" = "Armed — ⌘ + scroll in a target app";
+
+/* First-run permission alert title */
+"ScrollZoom needs Accessibility access" = "ScrollZoom needs Accessibility access";
+
+/* First-run permission alert body */
+"ScrollZoom watches for ⌘ + scroll and sends the matching font-size shortcut to Xcode. macOS requires Accessibility permission for both.\n\nGrant access in System Settings → Privacy & Security → Accessibility. ScrollZoom stays inactive until then." = "ScrollZoom watches for ⌘ + scroll and sends the matching font-size shortcut to Xcode. macOS requires Accessibility permission for both.\n\nGrant access in System Settings → Privacy & Security → Accessibility. ScrollZoom stays inactive until then.";
+
+/* First-run permission alert button */
+"Continue" = "Continue";
+
+/* Alert title when SMAppService registration fails */
+"Could not update the login item" = "Could not update the login item";
+
+/* Alert body when the failure has no description */
+"Unknown error." = "Unknown error.";
