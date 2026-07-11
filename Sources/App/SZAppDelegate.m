@@ -1,6 +1,9 @@
 #import "SZAppDelegate.h"
 
+#import <Carbon/Carbon.h>
+
 #import "SZAccessibility.h"
+#import "SZHotKey.h"
 #import "SZMenuController.h"
 #import "SZPermissionGate.h"
 #import "SZPreferences.h"
@@ -13,6 +16,7 @@
 @property (nonatomic, strong) SZAccessibility *accessibility;
 @property (nonatomic, strong) SZPermissionGate *permissionGate;
 @property (nonatomic, strong) SZZoomController *zoomController;
+@property (nonatomic, strong) SZHotKey *toggleHotKey;
 
 @end
 
@@ -35,9 +39,23 @@
     };
     [self.menuController install];
 
+    // ⌃⌥⌘Z pauses/resumes globally — the escape hatch if a gesture ever
+    // misbehaves inside a full-screen app.
+    self.toggleHotKey = [[SZHotKey alloc] initWithKeyCode:kVK_ANSI_Z
+                                                modifiers:(cmdKey | optionKey | controlKey)
+                                                  handler:^{
+                                                      [weakSelf toggleEnabledFromHotKey];
+                                                  }];
+    [self.toggleHotKey registerHotKey];
+
     [self.permissionGate runWithGrantedHandler:^{
         [weakSelf armEventPipeline];
     }];
+}
+
+- (void)toggleEnabledFromHotKey {
+    self.preferences.enabled = !self.preferences.isEnabled;
+    [self applyPreferences];
 }
 
 - (BOOL)applicationSupportsSecureRestorableState:(NSApplication *)application {
