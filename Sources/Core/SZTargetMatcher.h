@@ -22,6 +22,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable SZTargetRule *)ruleMatchingBundleIdentifier:(nullable NSString *)bundleIdentifier
                                             focusedRole:(nullable NSString *)focusedRole;
 
+/// Cheap pre-check so callers can skip the AX focus round-trip entirely for
+/// apps no rule mentions.
+- (BOOL)hasRuleForBundleIdentifier:(nullable NSString *)bundleIdentifier;
+
 @end
 
 NS_ASSUME_NONNULL_END
