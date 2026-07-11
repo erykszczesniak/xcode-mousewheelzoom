@@ -81,6 +81,12 @@ static const double SZSensitivityHighThreshold = 8.0;
     self.settingsItem.target = self;
     [menu addItem:self.settingsItem];
 
+    NSMenuItem *aboutItem = [[NSMenuItem alloc] initWithTitle:@"About ScrollZoom"
+                                                       action:@selector(showAbout:)
+                                                keyEquivalent:@""];
+    aboutItem.target = self;
+    [menu addItem:aboutItem];
+
     NSMenuItem *quitItem = [[NSMenuItem alloc] initWithTitle:@"Quit ScrollZoom"
                                                       action:@selector(terminate:)
                                                keyEquivalent:@"q"];
@@ -113,6 +119,9 @@ static const double SZSensitivityHighThreshold = 8.0;
 
 - (void)menuNeedsUpdate:(NSMenu *)menu {
     BOOL permitted = [self.stateProvider isPermissionGranted];
+
+    // Dim the menu bar icon whenever the gesture cannot fire.
+    self.statusItem.button.appearsDisabled = !permitted || !self.preferences.isEnabled;
 
     self.statusLineItem.title = [self statusLineTextWithPermission:permitted];
     self.enabledItem.state = self.preferences.isEnabled ? NSControlStateValueOn
@@ -187,6 +196,11 @@ static const double SZSensitivityHighThreshold = 8.0;
 - (void)selectSensitivity:(NSMenuItem *)sender {
     self.preferences.preciseDeltaThreshold = [sender.representedObject doubleValue];
     [self notifyConfigurationChanged];
+}
+
+- (void)showAbout:(NSMenuItem *)sender {
+    [NSApp activateIgnoringOtherApps:YES];
+    [NSApp orderFrontStandardAboutPanel:sender];
 }
 
 - (void)openSettings:(NSMenuItem *)sender {

@@ -17,8 +17,12 @@
 @property (nonatomic, strong) SZPermissionGate *permissionGate;
 @property (nonatomic, strong) SZZoomController *zoomController;
 @property (nonatomic, strong) SZHotKey *toggleHotKey;
+@property (nonatomic, strong) NSTimer *trustWatchTimer;
 
 @end
+
+/// How often to re-check that Accessibility trust is still granted.
+static const NSTimeInterval SZTrustWatchInterval = 5.0;
 
 @implementation SZAppDelegate
 
@@ -76,6 +80,31 @@
     }
     [self applyPreferences];
     [self.zoomController arm];
+    [self startTrustWatch];
+}
+
+#pragma mark - Permission-revoked recovery
+
+- (void)startTrustWatch {
+    if (self.trustWatchTimer != nil) {
+        return;
+    }
+    self.trustWatchTimer = [NSTimer scheduledTimerWithTimeInterval:SZTrustWatchInterval
+                                                            target:self
+                                                          selector:@selector(reviewTrustState:)
+                                                          userInfo:nil
+                                                           repeats:YES];
+}
+
+- (void)reviewTrustState:(NSTimer *)timer {
+    BOOL trusted = self.accessibility.isProcessTrusted;
+    if (!trusted && self.zoomController.isArmed) {
+        // Revoked mid-flight: stand down instead of posting keystrokes that
+        // the system would drop anyway. The menu shows the state.
+        [self.zoomController disarm];
+    } else if (trusted && self.zoomController != nil && !self.zoomController.isArmed) {
+        [self armEventPipeline];
+    }
 }
 
 - (void)applyPreferences {
