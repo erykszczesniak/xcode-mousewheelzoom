@@ -28,7 +28,7 @@ FOUNDATION_EXPORT NSString *const SZXcodeBundleIdentifier;
                              editorRoles:(nullable NSSet<NSString *> *)editorRoles
                                   mapper:(nullable SZActionMapper *)mapper;
 
-/// The built-in default: Xcode, acting only while a text area has focus.
+/// The built-in default: Xcode, regardless of which element has focus.
 + (instancetype)xcodeRule;
 
 - (instancetype)init NS_UNAVAILABLE;

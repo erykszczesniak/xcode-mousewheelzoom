@@ -34,8 +34,9 @@ NSString *const SZXcodeBundleIdentifier = @"com.apple.dt.Xcode";
 }
 
 + (instancetype)xcodeRule {
-    return [self ruleWithBundleIdentifier:SZXcodeBundleIdentifier
-                              editorRoles:[NSSet setWithObject:@"AXTextArea"]];
+    // No role constraint: Xcode's font-size shortcuts are app-wide, so the
+    // gesture should work with the navigator or toolbar focused too.
+    return [self ruleWithBundleIdentifier:SZXcodeBundleIdentifier editorRoles:nil];
 }
 
 @end

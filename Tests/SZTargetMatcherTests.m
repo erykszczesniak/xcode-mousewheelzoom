@@ -21,14 +21,28 @@
     XCTAssertEqualObjects(rule.bundleIdentifier, SZXcodeBundleIdentifier);
 }
 
-- (void)testXcodeWithNonEditorFocusDoesNotMatch {
-    XCTAssertNil([_matcher ruleMatchingBundleIdentifier:SZXcodeBundleIdentifier
-                                            focusedRole:@"AXButton"]);
+- (void)testXcodeWithNonEditorFocusStillMatches {
+    XCTAssertNotNil([_matcher ruleMatchingBundleIdentifier:SZXcodeBundleIdentifier
+                                               focusedRole:@"AXButton"]);
 }
 
-- (void)testXcodeWithUnknownFocusDoesNotMatch {
-    XCTAssertNil([_matcher ruleMatchingBundleIdentifier:SZXcodeBundleIdentifier
-                                            focusedRole:nil]);
+- (void)testXcodeWithUnknownFocusStillMatches {
+    XCTAssertNotNil([_matcher ruleMatchingBundleIdentifier:SZXcodeBundleIdentifier
+                                               focusedRole:nil]);
+}
+
+- (void)testRoleConstrainedRuleRequiresMatchingFocus {
+    SZTargetRule *constrained =
+        [SZTargetRule ruleWithBundleIdentifier:@"com.example.editor"
+                                   editorRoles:[NSSet setWithObject:@"AXTextArea"]];
+    SZTargetMatcher *matcher = [[SZTargetMatcher alloc] initWithRules:@[ constrained ]];
+
+    XCTAssertNotNil([matcher ruleMatchingBundleIdentifier:@"com.example.editor"
+                                              focusedRole:@"AXTextArea"]);
+    XCTAssertNil([matcher ruleMatchingBundleIdentifier:@"com.example.editor"
+                                           focusedRole:@"AXButton"]);
+    XCTAssertNil([matcher ruleMatchingBundleIdentifier:@"com.example.editor"
+                                           focusedRole:nil]);
 }
 
 - (void)testOtherAppIsPassthrough {
