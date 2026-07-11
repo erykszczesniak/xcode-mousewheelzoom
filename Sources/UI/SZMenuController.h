@@ -35,6 +35,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// Called from the "Start at Login" item.
 @property (nonatomic, copy, nullable) void (^toggleLoginItemHandler)(void);
 
+/// Called from the "Settings…" item (⌘,).
+@property (nonatomic, copy, nullable) void (^openSettingsWindowHandler)(void);
+
 /// Creates the status item and attaches the menu.
 - (void)install;
 

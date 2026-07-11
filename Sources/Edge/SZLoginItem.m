@@ -2,6 +2,9 @@
 
 #import <ServiceManagement/ServiceManagement.h>
 
+NSNotificationName const SZLoginItemDidChangeNotification =
+    @"SZLoginItemDidChangeNotification";
+
 @implementation SZLoginItem
 
 - (BOOL)isEnabled {
@@ -10,10 +13,14 @@
 
 - (BOOL)setEnabled:(BOOL)enabled error:(NSError **)error {
     SMAppService *service = SMAppService.mainAppService;
-    if (enabled) {
-        return [service registerAndReturnError:error];
+    BOOL succeeded = enabled ? [service registerAndReturnError:error]
+                             : [service unregisterAndReturnError:error];
+    if (succeeded) {
+        [[NSNotificationCenter defaultCenter]
+            postNotificationName:SZLoginItemDidChangeNotification
+                          object:self];
     }
-    return [service unregisterAndReturnError:error];
+    return succeeded;
 }
 
 @end
