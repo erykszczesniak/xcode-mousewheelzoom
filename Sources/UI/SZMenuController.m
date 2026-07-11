@@ -194,19 +194,16 @@ static const double SZSensitivityHighThreshold = 8.0;
 
 - (void)toggleEnabled:(NSMenuItem *)sender {
     self.preferences.enabled = !self.preferences.isEnabled;
-    [self notifyConfigurationChanged];
 }
 
 - (void)toggleTarget:(NSMenuItem *)sender {
     NSString *bundleIdentifier = sender.representedObject;
     BOOL enabled = [self.preferences isTargetEnabled:bundleIdentifier];
     [self.preferences setTarget:bundleIdentifier enabled:!enabled];
-    [self notifyConfigurationChanged];
 }
 
 - (void)selectSensitivity:(NSMenuItem *)sender {
     self.preferences.preciseDeltaThreshold = [sender.representedObject doubleValue];
-    [self notifyConfigurationChanged];
 }
 
 - (void)toggleLoginItem:(NSMenuItem *)sender {
@@ -223,12 +220,6 @@ static const double SZSensitivityHighThreshold = 8.0;
 - (void)openSettings:(NSMenuItem *)sender {
     if (self.openSettingsHandler) {
         self.openSettingsHandler();
-    }
-}
-
-- (void)notifyConfigurationChanged {
-    if (self.configurationChangedHandler) {
-        self.configurationChangedHandler();
     }
 }
 

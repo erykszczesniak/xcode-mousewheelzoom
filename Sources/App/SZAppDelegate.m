@@ -38,10 +38,14 @@ static const NSTimeInterval SZTrustWatchInterval = 5.0;
     self.menuController = [[SZMenuController alloc] initWithPreferences:self.preferences];
     self.menuController.stateProvider = self;
 
+    // Every preference mutation — from the menu, the hotkey, or any future
+    // UI — funnels through one notification into the live pipeline.
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(preferencesDidChange:)
+                                                 name:SZPreferencesDidChangeNotification
+                                               object:self.preferences];
+
     __weak typeof(self) weakSelf = self;
-    self.menuController.configurationChangedHandler = ^{
-        [weakSelf applyPreferences];
-    };
     self.menuController.openSettingsHandler = ^{
         [weakSelf.accessibility openAccessibilitySettings];
     };
@@ -66,6 +70,9 @@ static const NSTimeInterval SZTrustWatchInterval = 5.0;
 
 - (void)toggleEnabledFromHotKey {
     self.preferences.enabled = !self.preferences.isEnabled;
+}
+
+- (void)preferencesDidChange:(NSNotification *)notification {
     [self applyPreferences];
 }
 

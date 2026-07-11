@@ -42,6 +42,9 @@ targets:
       - path: Sources/Edge/SZKeystrokeSynthesizer.h
       - path: Sources/App/SZZoomController.h
       - path: Sources/App/SZZoomController.m
+      - path: Sources/UI/SZMenuController.h
+      - path: Sources/UI/SZMenuController.m
+      - path: Sources/UI/SZStrings.h
     settings:
       base:
         CLANG_ENABLE_OBJC_ARC: YES
