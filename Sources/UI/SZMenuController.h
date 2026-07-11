@@ -29,10 +29,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, weak) id<SZMenuStateProviding> stateProvider;
 
-/// Called after any toggle/sensitivity change so the pipeline can re-read
-/// the preferences.
-@property (nonatomic, copy, nullable) void (^configurationChangedHandler)(void);
-
 /// Called from the "Open Accessibility Settings…" item.
 @property (nonatomic, copy, nullable) void (^openSettingsHandler)(void);
 

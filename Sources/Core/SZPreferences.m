@@ -2,6 +2,9 @@
 
 #import "SZActionMapper.h"
 
+NSNotificationName const SZPreferencesDidChangeNotification =
+    @"SZPreferencesDidChangeNotification";
+
 static NSString *const SZEnabledKey = @"SZEnabled";
 static NSString *const SZPreciseDeltaThresholdKey = @"SZPreciseDeltaThreshold";
 static NSString *const SZDisabledTargetsKey = @"SZDisabledTargets";
@@ -45,6 +48,13 @@ static const double SZDefaultPreciseDeltaThresholdValue = 15.0;
 
 - (void)setEnabled:(BOOL)enabled {
     [self.userDefaults setBool:enabled forKey:SZEnabledKey];
+    [self notifyChanged];
+}
+
+- (void)notifyChanged {
+    [[NSNotificationCenter defaultCenter]
+        postNotificationName:SZPreferencesDidChangeNotification
+                      object:self];
 }
 
 #pragma mark - Sensitivity
@@ -56,6 +66,7 @@ static const double SZDefaultPreciseDeltaThresholdValue = 15.0;
 
 - (void)setPreciseDeltaThreshold:(double)preciseDeltaThreshold {
     [self.userDefaults setDouble:preciseDeltaThreshold forKey:SZPreciseDeltaThresholdKey];
+    [self notifyChanged];
 }
 
 #pragma mark - Per-target opt-out
@@ -78,14 +89,20 @@ static const double SZDefaultPreciseDeltaThresholdValue = 15.0;
         [disabled addObject:bundleIdentifier];
     }
     [self.userDefaults setObject:disabled.array forKey:SZDisabledTargetsKey];
+    [self notifyChanged];
 }
 
 #pragma mark - Target rules
 
 - (NSArray<SZTargetRule *> *)configuredTargetRules {
     NSArray *storedTargets = [self.userDefaults arrayForKey:SZTargetsKey];
-    if (storedTargets.count == 0) {
+    if (storedTargets == nil) {
         return @[ [SZTargetRule xcodeRule] ];
+    }
+    // An explicitly empty list is a deliberate "act on nothing" config; only
+    // a missing key (or an all-malformed list) falls back to the default.
+    if (storedTargets.count == 0) {
+        return @[];
     }
 
     NSMutableArray<SZTargetRule *> *rules = [NSMutableArray arrayWithCapacity:storedTargets.count];
@@ -96,6 +113,85 @@ static const double SZDefaultPreciseDeltaThresholdValue = 15.0;
         }
     }
     return rules.count > 0 ? [rules copy] : @[ [SZTargetRule xcodeRule] ];
+}
+
+#pragma mark - Target mutations
+
+- (BOOL)addTargetWithBundleIdentifier:(NSString *)bundleIdentifier {
+    if (bundleIdentifier.length == 0) {
+        return NO;
+    }
+    for (SZTargetRule *rule in self.configuredTargetRules) {
+        if ([rule.bundleIdentifier isEqualToString:bundleIdentifier]) {
+            return NO;
+        }
+    }
+
+    NSMutableArray *stored = [[self materializedStoredTargets] mutableCopy];
+    [stored addObject:@{SZTargetBundleIdentifierKey : bundleIdentifier}];
+    [self.userDefaults setObject:stored forKey:SZTargetsKey];
+    [self notifyChanged];
+    return YES;
+}
+
+- (BOOL)removeTargetWithBundleIdentifier:(NSString *)bundleIdentifier {
+    NSMutableArray *remaining = [NSMutableArray array];
+    BOOL found = NO;
+    for (NSDictionary *entry in [self materializedStoredTargets]) {
+        if ([entry[SZTargetBundleIdentifierKey] isEqual:bundleIdentifier]) {
+            found = YES;
+            continue;
+        }
+        [remaining addObject:entry];
+    }
+    if (!found) {
+        return NO;
+    }
+
+    [self.userDefaults setObject:remaining forKey:SZTargetsKey];
+    // A stale opt-out must not silently disable the target if it is
+    // re-added. Runs after the SZTargets write so the notification it posts
+    // already sees the fully-updated state.
+    [self setTarget:bundleIdentifier enabled:YES];
+    return YES;
+}
+
+/// The stored SZTargets list as mutations should see it: always consistent
+/// with the parsed view `configuredTargetRules` exposes. Valid entries are
+/// kept verbatim (custom keys survive); malformed ones are dropped on the
+/// first rewrite; when the key is absent — or every entry is malformed and
+/// the parsed view falls back to the defaults — the visible rules are
+/// serialized out first so edits never lose them.
+- (NSArray<NSDictionary *> *)materializedStoredTargets {
+    NSArray *storedTargets = [self.userDefaults arrayForKey:SZTargetsKey];
+    if (storedTargets != nil) {
+        NSMutableArray<NSDictionary *> *valid = [NSMutableArray array];
+        for (id entry in storedTargets) {
+            if ([self ruleFromDictionary:entry] != nil) {
+                [valid addObject:entry];
+            }
+        }
+        // An empty stored list stays deliberately empty; only an all-
+        // malformed list falls through to the fallback the user can see.
+        if (valid.count > 0 || storedTargets.count == 0) {
+            return valid;
+        }
+    }
+
+    NSMutableArray<NSDictionary *> *materialized = [NSMutableArray array];
+    for (SZTargetRule *rule in self.configuredTargetRules) {
+        [materialized addObject:[self dictionaryFromRule:rule]];
+    }
+    return materialized;
+}
+
+- (NSDictionary *)dictionaryFromRule:(SZTargetRule *)rule {
+    NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+    dictionary[SZTargetBundleIdentifierKey] = rule.bundleIdentifier;
+    if (rule.editorRoles.count > 0) {
+        dictionary[SZTargetEditorRolesKey] = rule.editorRoles.allObjects;
+    }
+    return [dictionary copy];
 }
 
 - (NSArray<SZTargetRule *> *)activeTargetRules {

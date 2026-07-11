@@ -4,6 +4,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/// Posted after any preference mutation (master switch, sensitivity, target
+/// set or per-target opt-out). Observers re-read whatever they need; the
+/// object is the posting SZPreferences instance.
+FOUNDATION_EXPORT NSNotificationName const SZPreferencesDidChangeNotification;
+
 /// NSUserDefaults-backed configuration. Custom targets can be added without
 /// UI, e.g.:
 ///
@@ -28,6 +33,16 @@ NS_ASSUME_NONNULL_BEGIN
 /// Per-target opt-out, keyed by bundle identifier. Defaults to enabled.
 - (BOOL)isTargetEnabled:(NSString *)bundleIdentifier;
 - (void)setTarget:(NSString *)bundleIdentifier enabled:(BOOL)enabled;
+
+/// Appends a role-agnostic rule for `bundleIdentifier` to the stored target
+/// list (materializing the built-in defaults first, so they survive edits).
+/// Returns NO if a rule for that bundle already exists.
+- (BOOL)addTargetWithBundleIdentifier:(NSString *)bundleIdentifier;
+
+/// Removes the rule for `bundleIdentifier` and clears its opt-out entry.
+/// Returns NO if no such rule exists. Removing every rule leaves the agent
+/// with nothing to act on (deliberate empty config, not a reset).
+- (BOOL)removeTargetWithBundleIdentifier:(NSString *)bundleIdentifier;
 
 /// All configured rules, disabled ones included — for listing in the menu.
 @property (nonatomic, readonly) NSArray<SZTargetRule *> *configuredTargetRules;
