@@ -29,12 +29,19 @@ static NSString *const SZAccessibilitySettingsURLString =
 }
 
 - (NSString *)focusedElementRole {
-    AXUIElementRef systemWide = AXUIElementCreateSystemWide();
+    // Ask the frontmost app's own AX element rather than the system-wide
+    // one: the system-wide focus query returns kAXErrorCannotComplete on
+    // recent macOS in some setups, while the per-app query is reliable.
+    NSRunningApplication *frontmost = [NSWorkspace sharedWorkspace].frontmostApplication;
+    if (frontmost == nil) {
+        return nil;
+    }
+    AXUIElementRef appElement = AXUIElementCreateApplication(frontmost.processIdentifier);
     CFTypeRef focused = NULL;
-    AXError error = AXUIElementCopyAttributeValue(systemWide,
+    AXError error = AXUIElementCopyAttributeValue(appElement,
                                                   kAXFocusedUIElementAttribute,
                                                   &focused);
-    CFRelease(systemWide);
+    CFRelease(appElement);
     if (error != kAXErrorSuccess || focused == NULL) {
         return nil;
     }
