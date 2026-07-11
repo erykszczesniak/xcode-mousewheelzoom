@@ -2,4 +2,6 @@
 xcuserdata/
 *.xcodeproj
 DerivedData/
-build/
+
+# Any derived-data directory, whatever it is named (build, buildns, buildrel…).
+build*/
