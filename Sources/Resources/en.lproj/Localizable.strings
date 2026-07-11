@@ -87,3 +87,27 @@
 
 /* Accessibility label for the zoom HUD overlay */
 "Zoom level" = "Zoom level";
+
+/* Standard Window menu title */
+"Window" = "Window";
+
+/* Standard Close item (⌘W) */
+"Close" = "Close";
+
+/* Empty state title in the targets list */
+"No target apps" = "No target apps";
+
+/* Empty state body in the targets list */
+"ScrollZoom stays idle until you add one." = "ScrollZoom stays idle until you add one.";
+
+/* Confirmation title when removing a target */
+"Remove %@ from the target list?" = "Remove %@ from the target list?";
+
+/* Confirmation body when removing a target */
+"⌘ + scroll will stop zooming in that app. You can add it back at any time." = "⌘ + scroll will stop zooming in that app. You can add it back at any time.";
+
+/* Destructive confirm button */
+"Remove" = "Remove";
+
+/* Cancel button */
+"Cancel" = "Cancel";

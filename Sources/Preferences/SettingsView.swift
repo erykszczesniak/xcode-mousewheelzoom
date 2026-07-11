@@ -5,6 +5,7 @@ import SwiftUI
 /// store the rest of the app already observes.
 struct SettingsView: View {
     @ObservedObject var model: SettingsViewModel
+    @State private var targetPendingRemoval: SettingsViewModel.Target?
 
     var body: some View {
         Form {
@@ -64,7 +65,7 @@ struct SettingsView: View {
                         }
                         Spacer()
                         Button(role: .destructive) {
-                            model.removeTarget(target)
+                            targetPendingRemoval = target
                         } label: {
                             Image(systemName: "trash")
                         }
@@ -73,6 +74,18 @@ struct SettingsView: View {
                                      comment: "Remove target tooltip"))
                     }
                 }
+
+                if model.targets.isEmpty {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(String(localized: "No target apps",
+                                    comment: "Empty state title in the targets list"))
+                        Text(String(localized: "ScrollZoom stays idle until you add one.",
+                                    comment: "Empty state body in the targets list"))
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
                 Button(String(localized: "Add Application…", comment: "Add target button")) {
                     model.presentAddTargetPanel()
                 }
@@ -88,6 +101,30 @@ struct SettingsView: View {
             }
         } message: {
             Text(model.lastErrorMessage ?? "")
+        }
+        .confirmationDialog(
+            targetPendingRemoval.map {
+                String(format: String(localized: "Remove %@ from the target list?",
+                                      comment: "Confirmation title when removing a target"),
+                       $0.displayName)
+            } ?? "",
+            isPresented: Binding(get: { targetPendingRemoval != nil },
+                                 set: { if !$0 { targetPendingRemoval = nil } }),
+            titleVisibility: .visible
+        ) {
+            Button(String(localized: "Remove", comment: "Destructive confirm button"),
+                   role: .destructive) {
+                if let target = targetPendingRemoval {
+                    model.removeTarget(target)
+                }
+                targetPendingRemoval = nil
+            }
+            Button(String(localized: "Cancel", comment: "Cancel button"), role: .cancel) {
+                targetPendingRemoval = nil
+            }
+        } message: {
+            Text(String(localized: "⌘ + scroll will stop zooming in that app. You can add it back at any time.",
+                        comment: "Confirmation body when removing a target"))
         }
     }
 }

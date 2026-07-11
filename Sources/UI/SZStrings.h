@@ -47,6 +47,14 @@ static inline NSString *SZLocalizedMenuSettings(void) {
     return NSLocalizedString(@"Settings…", @"Opens the Settings window");
 }
 
+static inline NSString *SZLocalizedMenuWindow(void) {
+    return NSLocalizedString(@"Window", @"Standard Window menu title");
+}
+
+static inline NSString *SZLocalizedMenuClose(void) {
+    return NSLocalizedString(@"Close", @"Standard Close item (⌘W)");
+}
+
 static inline NSString *SZLocalizedMenuOpenAccessibilitySettings(void) {
     return NSLocalizedString(@"Open Accessibility Settings…",
                              @"Deep link to the Accessibility privacy pane");
@@ -108,6 +116,9 @@ static inline NSString *SZLocalizedHUDAccessibilityLabel(void) {
 }
 
 #pragma mark - Settings window
+
+// The Settings window is SwiftUI and localizes its own copy via
+// String(localized:); only strings the ObjC side formats live here.
 
 static inline NSString *SZLocalizedSettingsNoBundleIdentifierFormat(void) {
     return NSLocalizedString(@"“%@” has no bundle identifier, so it cannot be targeted.",
