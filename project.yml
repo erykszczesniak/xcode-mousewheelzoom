@@ -1,0 +1,44 @@
+name: ScrollZoom
+options:
+  bundleIdPrefix: com.erykszczesniak
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+
+targets:
+  ScrollZoom:
+    type: application
+    platform: macOS
+    sources:
+      - Sources
+    info:
+      path: Sources/Info.plist
+      properties:
+        CFBundleName: ScrollZoom
+        CFBundleDisplayName: ScrollZoom
+        LSUIElement: true
+        NSHumanReadableCopyright: "© 2026 Eryk Szczesniak"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.erykszczesniak.ScrollZoom
+        CLANG_ENABLE_OBJC_ARC: YES
+        CODE_SIGN_IDENTITY: "-"
+
+  ScrollZoomTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - Tests
+    settings:
+      base:
+        CLANG_ENABLE_OBJC_ARC: YES
+
+schemes:
+  ScrollZoom:
+    build:
+      targets:
+        ScrollZoom: all
+        ScrollZoomTests: [test]
+    test:
+      targets:
+        - ScrollZoomTests
