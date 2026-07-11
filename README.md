@@ -18,7 +18,7 @@ open ScrollZoom.xcodeproj   # build & run (⌘R)
 
 Grant Accessibility when prompted, then hold ⌘ and scroll in Xcode. ⌃⌥⌘Z pauses/resumes.
 
-## Install for good
+## Install
 
 ```
 xcodegen generate
