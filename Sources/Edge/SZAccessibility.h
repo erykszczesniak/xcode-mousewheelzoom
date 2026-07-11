@@ -14,9 +14,26 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-/// Thin edge wrapper over AXIsProcessTrusted / AXIsProcessTrustedWithOptions.
-/// No logic beyond the API call — keep this layer boring.
-@interface SZAccessibility : NSObject <SZAccessibilityTrustChecking>
+/// Seam over "what is the user looking at right now" — frontmost app and
+/// focused element role — so the pipeline can be tested with canned values.
+@protocol SZFocusInspecting <NSObject>
+
+/// Bundle identifier of the frontmost app, or nil if none.
+- (nullable NSString *)frontmostApplicationBundleIdentifier;
+
+/// Process identifier of the frontmost app, or -1 if none. Keystrokes are
+/// posted to this pid so they cannot land in a different app mid-gesture.
+- (pid_t)frontmostApplicationProcessIdentifier;
+
+/// AX role of the system-wide focused element (e.g. `AXTextArea`), or nil
+/// when it cannot be determined.
+- (nullable NSString *)focusedElementRole;
+
+@end
+
+/// Thin edge wrapper over the Accessibility C API and NSWorkspace.
+/// No logic beyond the API calls — keep this layer boring.
+@interface SZAccessibility : NSObject <SZAccessibilityTrustChecking, SZFocusInspecting>
 
 /// Opens System Settings at the Privacy & Security → Accessibility pane.
 - (void)openAccessibilitySettings;
