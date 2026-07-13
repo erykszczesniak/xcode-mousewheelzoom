@@ -54,19 +54,6 @@ defaults write com.erykszczesniak.ScrollZoom SZTargets -array-add \
 
 ## How it works
 
-ScrollZoom is a lightweight menu bar app that listens for ⌘ + scroll, converts it to ⌘= / ⌘-, and sends the shortcut only to the frontmost supported app using CGEventPostToPid.
+Listens for ⌘ + scroll, converts it to ⌘= / ⌘-, and sends the shortcut only to the frontmost supported app. No code injection, SIP changes, plugins, or third-party dependencies.
 
-No code injection, SIP changes, plugins, or third-party dependencies.
-
-```
-Cmd + mouse wheel
-   |
-   v
-SZEventTap -> SZGestureInterpreter -> SZTargetMatcher -> SZActionMapper -> SZKeystrokeSynthesizer -> Xcode
- (observe)     (delta to intent)      (act or pass)      (intent to keys)   (CGEventPostToPid)
-```
-
-- **Core**, pure logic and fully unit tested: `SZGestureInterpreter` (throttling, trackpad accumulation, momentum ignored), `SZTargetMatcher` and `SZTargetRule` (per-app rules), `SZActionMapper` (intent to shortcut), `SZZoomLevelTracker` (the step count behind the HUD), `SZPreferences`.
-- **Edge**, thin wrappers behind protocols: `SZEventTap`, `SZAccessibility`, `SZKeystrokeSynthesizer`, `SZHotKey`, `SZLoginItem`, `NSEvent+SZModifiers`.
-- **UI and app**: `SZMenuController` (four states: permission needed, paused, active, armed), `SZZoomHUD` (click-through overlay), a SwiftUI Settings window bridged into the Objective-C app, `SZZoomController` (wires the pipeline, every dependency injected), `SZPermissionGate` (first-run explainer, recovers if permission is revoked).
-- **Strings** all live in `SZStrings.h` and `Localizable.strings`.
+Full breakdown: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
