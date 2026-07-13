@@ -1,24 +1,24 @@
 # Xcode - Mouse Wheel Zoom
 
-⌘ + mouse-wheel zoom for Xcode (macOS) — the VS Code gesture, with an on-screen zoom level.
+Hold Cmd, scroll, and Xcode's font grows or shrinks. The VS Code gesture, on macOS.
 
-![⌘ + scroll zooming Xcode, with the zoom HUD](docs/demo.gif)
+![Cmd + scroll zooming Xcode, with the zoom HUD](docs/demo.gif)
+
+A HUD shows how far you have zoomed. Ctrl-Opt-Cmd-Z pauses and resumes the agent.
 
 ## Requirements
 
-- macOS 14+
-- Accessibility permission (prompted on first run; if the toggle is on but nothing happens after a rebuild, remove ScrollZoom from the Accessibility list and re-add it)
+- macOS 14 or newer
+- Accessibility permission (you get asked on first run)
 
 ## Run
 
 ```
 xcodegen generate
-open ScrollZoom.xcodeproj   # build & run (⌘R)
+open ScrollZoom.xcodeproj   # build and run with Cmd-R
 ```
 
-Grant Accessibility when prompted, then hold ⌘ and scroll in Xcode. A HUD shows how many steps you have zoomed. ⌃⌥⌘Z pauses and resumes the agent.
-
-## Install Permanently
+## Install for good
 
 ```
 xcodegen generate
@@ -27,52 +27,50 @@ cp -R build/Build/Products/Release/ScrollZoom.app /Applications/
 open /Applications/ScrollZoom.app
 ```
 
-Enable **Start at Login** from the menu or in Settings, and the agent comes back after every reboot.
+Turn on **Start at Login** and it comes back after every reboot.
 
 ![Menu bar](docs/menu.png)
 
 ## Settings
 
-Open **Settings…** from the menu bar (⌘, once the window is up, ⌘W to close).
+Open **Settings...** from the menu bar.
 
 ![Settings window](docs/settings.png)
 
-- **Enabled** — master switch, mirrored by the ⌃⌥⌘Z hotkey.
-- **Start at Login** — registers the agent as a login item (`SMAppService`).
-- **Sensitivity** — how far a trackpad swipe travels per zoom step (25 px at Low, 8 px at High). A mouse wheel always steps once per notch, so this only affects trackpads. Changes apply live.
+- **Enabled** turns the agent off and on. Same as the Ctrl-Opt-Cmd-Z hotkey.
+- **Start at Login** registers the app as a login item.
+- **Sensitivity** sets how far a trackpad swipe travels per zoom step, from 25 px (Low) to 8 px (High). A mouse wheel always steps once per notch, so this only matters on a trackpad. Changes apply right away.
 
-## Targets: not just Xcode
+## Targets
 
-Xcode is the default target, but any app with ⌘= / ⌘- font-size shortcuts works — editors, browsers, terminals. Click **Add Application…**, pick the app, and its bundle identifier becomes a new target rule. Chrome, for example, then zooms with the same gesture.
+Xcode is the default, but any app with Cmd-+ / Cmd-- font shortcuts works. Editors, browsers, terminals. Click **Add Application...**, pick the app, done. Chrome zooms with the same gesture from then on.
 
 ![Adding an app to Targets](docs/targets.gif)
 
-Each target has its own switch (turn it off without removing it) and a trash button (with confirmation). Everything is stored in `NSUserDefaults`, so a target can also be added without the UI:
+Each target has its own switch, so you can turn one off without removing it. You can also add one without the UI:
 
 ```
 defaults write com.erykszczesniak.ScrollZoom SZTargets -array-add \
   '{ bundleIdentifier = "com.example.editor"; }'
 ```
 
-Optional per-target keys `zoomInKeyCode` / `zoomOutKeyCode` (virtual key codes, posted with ⌘) override the default ⌘= / ⌘- mapping for apps that bind zoom elsewhere.
+If an app binds zoom to other keys, set `zoomInKeyCode` and `zoomOutKeyCode` on its entry.
 
 ## How it works
 
-ScrollZoom is a menu-bar agent that adds VS Code–style ⌘ + mouse wheel zoom to Xcode.
+ScrollZoom watches for Cmd + scroll through the Accessibility API, turns the gesture into Cmd-+ or Cmd--, and sends those keys straight to the app in front with `CGEventPostToPid`. Never system wide, so a zoom step can only reach the app you were pointing at. No SIP changes, no code injection, no third-party dependencies. Pure Cocoa.
 
-It listens for ⌘ + scroll via the Accessibility API, translates the gesture into `⌘=` / `⌘-`, and sends the shortcuts to the frontmost target process with `CGEventPostToPid` — never system-wide, so a zoom step can only reach the app you were actually pointing at. No SIP changes, no code injection, no third-party dependencies — pure Cocoa.
-
-Note what this is not: a renderer-level, pixel-smooth zoom. Xcode has no plugin API, so nobody outside it can own the text rendering. This is a stepped font-size zoom mapped onto a natural gesture — which, in day-to-day use, is what you actually wanted.
+What it is not: a smooth, renderer-level zoom. Xcode has no plugin API, so nobody outside it can own the text rendering. This is a stepped font-size zoom on a natural gesture, which in daily use is what you wanted anyway.
 
 ```
-⌘ + mouse wheel
-   │
-   ▼
-SZEventTap ──► SZGestureInterpreter ──► SZTargetMatcher ──► SZActionMapper ──► SZKeystrokeSynthesizer ──► Xcode (⌘= / ⌘-)
- (observe)      (delta → intent)         (act or pass)       (intent → keys)     (CGEventPostToPid)
+Cmd + mouse wheel
+   |
+   v
+SZEventTap -> SZGestureInterpreter -> SZTargetMatcher -> SZActionMapper -> SZKeystrokeSynthesizer -> Xcode
+ (observe)     (delta to intent)      (act or pass)      (intent to keys)   (CGEventPostToPid)
 ```
 
-- **Core** (pure logic, 100% unit-testable): `SZGestureInterpreter` (delta → intent: throttling, trackpad accumulation, momentum ignored), `SZTargetMatcher` + `SZTargetRule` (per-app rules), `SZActionMapper` (intent → shortcut), `SZZoomLevelTracker` (per-app step count behind the HUD), `SZPreferences` (`NSUserDefaults` config).
-- **Edge** (thin wrappers behind protocols): `SZEventTap`, `SZAccessibility`, `SZKeystrokeSynthesizer`, `SZHotKey` (⌃⌥⌘Z pause), `SZLoginItem` (`SMAppService`), `NSEvent+SZModifiers`.
-- **UI / App**: `SZMenuController` (four states: permission needed / Paused / Active / Armed), `SZZoomHUD` (the non-activating, click-through overlay), the SwiftUI Settings window bridged into the Objective-C app, `SZZoomController` (ties the pipeline together, every dependency injected behind a protocol), `SZPermissionGate` (first-run explainer, auto-recovery after revocation).
-- **Strings**: all user-facing copy in `SZStrings.h` (`NSLocalizedString`) + `Localizable.strings`.
+- **Core**, pure logic and fully unit tested: `SZGestureInterpreter` (throttling, trackpad accumulation, momentum ignored), `SZTargetMatcher` and `SZTargetRule` (per-app rules), `SZActionMapper` (intent to shortcut), `SZZoomLevelTracker` (the step count behind the HUD), `SZPreferences`.
+- **Edge**, thin wrappers behind protocols: `SZEventTap`, `SZAccessibility`, `SZKeystrokeSynthesizer`, `SZHotKey`, `SZLoginItem`, `NSEvent+SZModifiers`.
+- **UI and app**: `SZMenuController` (four states: permission needed, paused, active, armed), `SZZoomHUD` (click-through overlay), a SwiftUI Settings window bridged into the Objective-C app, `SZZoomController` (wires the pipeline, every dependency injected), `SZPermissionGate` (first-run explainer, recovers if permission is revoked).
+- **Strings** all live in `SZStrings.h` and `Localizable.strings`.
