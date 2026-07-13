@@ -19,8 +19,7 @@ xcodegen generate
 open ScrollZoom.xcodeproj   # build and run with Cmd-R
 ```
 
-## Install for good
-
+## Install
 ```
 xcodegen generate
 xcodebuild -scheme ScrollZoom -configuration Release -derivedDataPath build build
