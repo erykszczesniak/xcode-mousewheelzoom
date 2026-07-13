@@ -53,7 +53,4 @@ defaults write com.erykszczesniak.ScrollZoom SZTargets -array-add \
 
 
 ## How it works
-
-Listens for ⌘ + scroll, converts it to ⌘= / ⌘-, and sends the shortcut only to the frontmost supported app. No code injection, SIP changes, plugins, or third-party dependencies.
-
-Full breakdown: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
