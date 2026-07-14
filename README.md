@@ -49,8 +49,5 @@ defaults write com.erykszczesniak.ScrollZoom SZTargets -array-add \
   '{ bundleIdentifier = "com.example.editor"; }'
 ```
 
-![Adding an app to Targets](docs/targets.gif)
-
-
 ## How it works
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
